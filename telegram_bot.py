@@ -9,7 +9,7 @@ from telegram import (Update, ReplyKeyboardMarkup,
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           CallbackContext, ConversationHandler)
 
-from main import get_questions
+from get_questions import get_questions
 
 
 logger = logging.getLogger(__name__)
