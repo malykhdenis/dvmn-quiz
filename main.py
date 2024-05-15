@@ -9,15 +9,28 @@ def get_questions(path):
         result = dict()
         i = 0
         while i < len(main_list) - 1:
-            if 'Вопрос' in main_list[i]:
+            if main_list[i].startswith('Вопрос'):
                 try:
                     question = ' '.join(
                         main_list[i].split(':\n')[1].rstrip('\n').split('\n')
                     )
+                    result[question] = dict(
+                        answer=None,
+                        smart_answer=None,
+                        comment=None,
+                    )
                     answer = ' '.join(
                         main_list[i + 1].split(':\n')[1].rstrip('\n').split('\n')
                     )
-                    result[question] = answer
+                    result[question]['answer'] = answer
+                    smart_answer = answer.split('.')[0]
+                    result[question]['smart_answer'] = smart_answer
+                    if main_list[i + 2].startswith('Комментарий'):
+                        comment = ' '.join(
+                            main_list[i + 2].split(':\n')[1].rstrip('\n').split('\n')
+                        )
+                        result[question]['comment'] = comment
+                        i += 1
                     i += 2
                     continue
                 except IndexError:
