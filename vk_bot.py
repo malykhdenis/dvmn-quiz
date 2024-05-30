@@ -126,13 +126,10 @@ def main(token: str) -> None:
         if event.type == VkEventType.MESSAGE_NEW and event.to_me:
             if event.text == '/start':
                 start(event, vk_api)
-                continue
-            if event.text == 'Сдаться':
+            elif event.text == 'Сдаться':
                 give_up(event, vk_api, questions, redis_db)
-                continue
-            if event.text == 'Новый вопрос':
+            elif event.text == 'Новый вопрос':
                 ask_question(event, vk_api, questions, redis_db)
-                continue
             else:
                 check_answer(event, vk_api, questions, redis_db)
 
