@@ -105,7 +105,7 @@ def check_answer(
         )
 
 
-def main(token: str, questions: dict) -> None:
+def main(token: str) -> None:
     """Start VK bot."""
     vk_session = vk.VkApi(token=token)
     vk_api = vk_session.get_api()
@@ -119,6 +119,8 @@ def main(token: str, questions: dict) -> None:
         port=env.int('REDIS_PORT'),
         password=env.str('REDIS_PASSWORD'),
     )
+
+    questions = get_questions('quiz-questions/')
 
     for event in longpoll.listen():
         if event.type == VkEventType.MESSAGE_NEW and event.to_me:
@@ -136,16 +138,12 @@ def main(token: str, questions: dict) -> None:
 
 
 if __name__ == "__main__":
-    env = Env()
-    env.read_env()
-
     logging.basicConfig(
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         level=logging.INFO,
     )
 
-    vk_token = env.str('VK_GROUP_TOKEN')
+    env = Env()
+    env.read_env()
 
-    quiz_questions = get_questions('quiz-questions/')
-
-    main(vk_token, quiz_questions)
+    main(env.str('VK_GROUP_TOKEN'))

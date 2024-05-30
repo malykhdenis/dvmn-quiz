@@ -1,3 +1,4 @@
+
 import logging
 import random
 from enum import Enum
@@ -96,7 +97,7 @@ def cancel(update: Update, context: CallbackContext) -> None:
     return ConversationHandler.END
 
 
-def main(token: str, questions: dict) -> None:
+def main(token: str) -> None:
     """Start the bot."""
     updater = Updater(token)
 
@@ -133,7 +134,7 @@ def main(token: str, questions: dict) -> None:
 
     dispatcher.add_handler(conv_handler)
 
-    dispatcher.bot_data = questions
+    dispatcher.bot_data = get_questions('quiz-questions/')
 
     updater.start_polling()
 
@@ -149,8 +150,4 @@ if __name__ == '__main__':
     env = Env()
     env.read_env()
 
-    telegram_token = env.str('TELEGRAM_BOT_TOKEN')
-
-    quiz_questions = get_questions('quiz-questions/')
-
-    main(telegram_token, quiz_questions)
+    main(env.str('TELEGRAM_BOT_TOKEN'))
