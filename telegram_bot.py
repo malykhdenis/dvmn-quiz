@@ -1,10 +1,10 @@
 import logging
 import random
-import redis
-
-from environs import Env
 from enum import Enum
 from functools import partial
+
+import redis
+from environs import Env
 from telegram import (Update, ReplyKeyboardMarkup,
                       ReplyKeyboardRemove)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 State = Enum('State', ['ASK', 'CHECK'])
 
 
-def start(update: Update, context: CallbackContext) -> None:
+def start(update: Update, context: CallbackContext) -> State:
     """Send a message when the command /start is issued."""
     custom_keyboard = [
         ['Новый вопрос', 'Сдаться'],
@@ -33,7 +33,11 @@ def start(update: Update, context: CallbackContext) -> None:
     return State.ASK
 
 
-def handle_solution_attempt(update: Update, context: CallbackContext, db) -> None:
+def handle_solution_attempt(
+    update: Update,
+    context: CallbackContext,
+    db: redis.Redis,
+) -> None:
     """Check answer in the user message."""
     correct_answer = context.bot_data[
         db.get(update.message.from_user.id).decode('utf-8')
@@ -57,7 +61,8 @@ def handle_solution_attempt(update: Update, context: CallbackContext, db) -> Non
 def handle_new_question_request(
         update: Update,
         context: CallbackContext,
-        db) -> None:
+        db: redis.Redis,
+) -> None:
     """Ask random question."""
     question_text = random.choice(list(context.bot_data))
     db.set(update.message.from_user.id, question_text)
@@ -66,7 +71,11 @@ def handle_new_question_request(
     return State.CHECK
 
 
-def give_up(update: Update, context: CallbackContext, db) -> None:
+def give_up(
+    update: Update,
+    context: CallbackContext,
+    db: redis.Redis
+) -> None:
     """Get answer and another question."""
     correct_answer = context.bot_data[
         db.get(update.message.from_user.id).decode('utf-8')
@@ -87,9 +96,9 @@ def cancel(update: Update, context: CallbackContext) -> None:
     return ConversationHandler.END
 
 
-def main(questions: dict) -> None:
+def main(token: str, questions: dict) -> None:
     """Start the bot."""
-    updater = Updater(env.str('TELEGRAM_BOT_TOKEN'))
+    updater = Updater(token)
 
     dispatcher = updater.dispatcher
 
@@ -140,6 +149,8 @@ if __name__ == '__main__':
     env = Env()
     env.read_env()
 
+    telegram_token = env.str('TELEGRAM_BOT_TOKEN')
+
     quiz_questions = get_questions('quiz-questions/')
 
-    main(quiz_questions)
+    main(telegram_token, quiz_questions)

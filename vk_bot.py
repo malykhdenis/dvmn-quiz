@@ -25,7 +25,9 @@ def start(event: vk.longpoll.Event, vk_api: vk.vk_api.VkApiMethod) -> None:
 def ask_question(
         event: vk.longpoll.Event,
         vk_api: vk.vk_api.VkApiMethod,
-        questions: str) -> None:
+        questions: str,
+        db: redis.Redis,
+) -> None:
     """Ask random question."""
     keyboard = VkKeyboard()
     keyboard.add_button('Сдаться')
@@ -42,7 +44,9 @@ def ask_question(
 def give_up(
         event: vk.longpoll.Event,
         vk_api: vk.vk_api.VkApiMethod,
-        questions: dict) -> None:
+        questions: dict,
+        db: redis.Redis,
+) -> None:
     """Get answer and another question."""
     correct_answer = questions[
         db.get(event.user_id).decode('utf-8')
@@ -64,7 +68,9 @@ def give_up(
 def check_answer(
         event: vk.longpoll.Event,
         vk_api: vk.vk_api.VkApiMethod,
-        questions: dict) -> None:
+        questions: dict,
+        db: redis.Redis,
+) -> None:
     """Check answer in the user message."""
     correct_answer = questions[
         db.get(event.user_id).decode('utf-8')
@@ -99,14 +105,20 @@ def check_answer(
         )
 
 
-def main(questions: dict) -> None:
+def main(token: str, questions: dict) -> None:
     """Start VK bot."""
-    vk_session = vk.VkApi(token=env.str('VK_GROUP_TOKEN'))
+    vk_session = vk.VkApi(token=token)
     vk_api = vk_session.get_api()
 
     longpoll = VkLongPoll(vk_session)
 
     logging.info('VK bot started.')
+
+    redis_db = redis.Redis(
+        host=env.str('REDIS_HOST'),
+        port=env.int('REDIS_PORT'),
+        password=env.str('REDIS_PASSWORD'),
+    )
 
     for event in longpoll.listen():
         if event.type == VkEventType.MESSAGE_NEW and event.to_me:
@@ -114,13 +126,13 @@ def main(questions: dict) -> None:
                 start(event, vk_api)
                 continue
             if event.text == 'Сдаться':
-                give_up(event, vk_api, questions)
+                give_up(event, vk_api, questions, redis_db)
                 continue
             if event.text == 'Новый вопрос':
-                ask_question(event, vk_api, questions)
+                ask_question(event, vk_api, questions, redis_db)
                 continue
             else:
-                check_answer(event, vk_api, questions)
+                check_answer(event, vk_api, questions, redis_db)
 
 
 if __name__ == "__main__":
@@ -132,12 +144,8 @@ if __name__ == "__main__":
         level=logging.INFO,
     )
 
+    vk_token = env.str('VK_GROUP_TOKEN')
+
     quiz_questions = get_questions('quiz-questions/')
 
-    db = redis.Redis(
-        host=env.str('REDIS_HOST'),
-        port=env.int('REDIS_PORT'),
-        password=env.str('REDIS_PASSWORD'),
-    )
-
-    main(quiz_questions)
+    main(vk_token, quiz_questions)
