@@ -3,8 +3,8 @@ import os
 
 def get_questions(path):
     for file in os.scandir(path):
-        with open(file.path, "r", encoding='KOI8-R') as my_file:
-            file_contents = my_file.read()
+        with open(file.path, "r", encoding='KOI8-R') as file:
+            file_contents = file.read()
         main_list = file_contents.split('\n\n')
         result = dict()
         i = 0
