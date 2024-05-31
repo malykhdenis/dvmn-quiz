@@ -43,7 +43,7 @@ def handle_solution_attempt(
     correct_answer = context.bot_data[
         db.get(update.message.from_user.id).decode('utf-8')
     ]
-    if update.message.text == correct_answer['smart_answer']:
+    if update.message.text == correct_answer['short_answer']:
         update.message.reply_text('Правильно! Поздравляю!')
         if correct_answer['comment']:
             update.message.reply_text(f'{correct_answer["comment"]}')

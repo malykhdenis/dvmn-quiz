@@ -77,7 +77,7 @@ def check_answer(
     ]
     keyboard = VkKeyboard()
     keyboard.add_button('Новый вопрос')
-    if event.text == correct_answer['smart_answer']:
+    if event.text == correct_answer['short_answer']:
         vk_api.messages.send(
             user_id=event.user_id,
             message='Правильно! Поздравляю!',
