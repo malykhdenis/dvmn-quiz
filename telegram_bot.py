@@ -1,4 +1,3 @@
-
 import logging
 import random
 from enum import Enum
@@ -97,9 +96,17 @@ def cancel(update: Update, context: CallbackContext) -> None:
     return ConversationHandler.END
 
 
-def main(token: str) -> None:
+def main() -> None:
     """Start the bot."""
-    updater = Updater(token)
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.INFO,
+    )
+
+    env = Env()
+    env.read_env()
+
+    updater = Updater(env.str('TELEGRAM_BOT_TOKEN'))
 
     dispatcher = updater.dispatcher
 
@@ -142,12 +149,4 @@ def main(token: str) -> None:
 
 
 if __name__ == '__main__':
-    logging.basicConfig(
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        level=logging.INFO,
-    )
-
-    env = Env()
-    env.read_env()
-
-    main(env.str('TELEGRAM_BOT_TOKEN'))
+    main()

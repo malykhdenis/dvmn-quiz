@@ -107,7 +107,15 @@ def check_answer(
 
 def main(token: str) -> None:
     """Start VK bot."""
-    vk_session = vk.VkApi(token=token)
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.INFO,
+    )
+
+    env = Env()
+    env.read_env()
+
+    vk_session = vk.VkApi(token=env.str('VK_GROUP_TOKEN'))
     vk_api = vk_session.get_api()
 
     longpoll = VkLongPoll(vk_session)
@@ -135,12 +143,4 @@ def main(token: str) -> None:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        level=logging.INFO,
-    )
-
-    env = Env()
-    env.read_env()
-
-    main(env.str('VK_GROUP_TOKEN'))
+    main()
